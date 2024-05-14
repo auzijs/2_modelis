@@ -2,6 +2,7 @@ import cvxpy as cp
 import random
 from warehouse_gen import generate_warehouse_dataset, create_distance_matrix, create_warehouse_graph, draw_warehouse_graph
 import numpy as np
+import time
 
 def extract_route(K, N_0, x):
     routes = {}
@@ -70,15 +71,15 @@ def print_stats(problem, x_values, u_values, t, nCount, vehicleCount):
 seed = 10
 random.seed(seed)
 
-C = 30
-K = 2
+C = 90
+K = 4
 T = 100
-nCount = 10
+nCount = 18
 
-num_cols_before_M = 15
-num_cols_after_M = 13
+num_cols_before_M = 21
+num_cols_after_M = 24
 num_cols_total = num_cols_before_M + num_cols_after_M
-num_rows = 15
+num_rows = 16
 T_z = 1 #first cross aisle col
 M_z = (num_cols_before_M + num_cols_after_M) // 2 + 2 #second cross aisle col
 B_z = num_cols_total + 3 #third cross aisle col
@@ -134,11 +135,14 @@ for i in N:
 
 
 problem = cp.Problem(objective, constraints)
+start_time = time.time()
 problem.solve(solver=cp.CPLEX, verbose=True)
+end_time = time.time()
 
 x_values = x.value
 u_values = u.value
 print_stats(problem, x_values, u_values, t, nCount, K)
+print("Solution time: ", end_time - start_time)
 routes = extract_route(K, N_0, x_values)
 G = create_warehouse_graph(locations_df, num_cols_before_M, num_cols_after_M, num_rows, routes)
 draw_warehouse_graph(G, locations_df, True)

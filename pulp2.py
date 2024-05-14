@@ -1,6 +1,7 @@
 import pulp
 import random
 from warehouse_gen import generate_warehouse_dataset, create_distance_matrix, create_warehouse_graph, draw_warehouse_graph
+import time
 
 def extract_route(K, N_0, x):
     routes = {}
@@ -70,12 +71,12 @@ def print_stats(model, vehicleCount, N, N_0, x, t, u):
 seed = 10
 random.seed(seed)
 
-K = 2 
-C = 30
+C = 50
+K = 1
 T = 100
-nCount = 10
+nCount = 7
 
-num_cols_before_M = 15
+num_cols_before_M = 11
 num_cols_after_M = 13
 num_cols_total = num_cols_before_M + num_cols_after_M
 num_rows = 15
@@ -130,8 +131,11 @@ for i in N:
     model += pulp.lpSum(t[(1, i)]) <= a[i]
 
 solver = pulp.CPLEX_CMD(msg=1)
+start_time = time.time()
 model.solve(solver)
+end_time = time.time()
 print_stats(model, K, N, N_0, x, t, u)
+print("Solution time: ", end_time - start_time)
 routes = extract_route(K, N_0, x)
 G = create_warehouse_graph(locations_df, num_cols_before_M, num_cols_after_M, num_rows, routes)
 draw_warehouse_graph(G, locations_df, True)

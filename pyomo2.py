@@ -2,6 +2,7 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory
 import random
 from warehouse_gen import generate_warehouse_dataset, create_distance_matrix, create_warehouse_graph, draw_warehouse_graph
+import time
 
 def extract_route(model):
     routes = {}
@@ -71,10 +72,10 @@ def print_stats(model):
 seed = 10
 random.seed(seed)
 
-C = 30
-K = 2
-T = 100
-nCount = 10
+C = 100
+K = 1
+T = 900
+nCount = 44
 
 num_cols_before_M = 11
 num_cols_after_M = 13
@@ -173,8 +174,11 @@ model.time = Constraint(model.N, rule=time_rule)
 
 
 opt = SolverFactory('cplex')
+start_time = time.time()
 opt.solve(model, tee=True)
+end_time = time.time()
 print_stats(model)
+print("Solution time: ", end_time - start_time)
 routes = extract_route(model)
 G = create_warehouse_graph(locations_df, num_cols_before_M, num_cols_after_M, num_rows, routes)
 draw_warehouse_graph(G, locations_df, True)
